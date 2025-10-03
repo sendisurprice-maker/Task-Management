@@ -1,0 +1,313 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Task Management Tracker Surprice</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f9; }
+    header { background: #2c3e50; color: white; padding: 15px; text-align: center; font-size: 22px; }
+    .login-box, .register-box, .content { max-width: 500px; margin: 80px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+    .hidden { display: none; }
+    input[type=text], input[type=password], input[type=email], input[type=file] {
+      width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px;
+    }
+    button {
+      padding: 10px 20px; background: #1abc9c; color: white; border: none; border-radius: 6px; cursor: pointer;
+    }
+    button:hover { background: #16a085; }
+    .sidebar {
+      width: 220px; background: #34495e; position: fixed; top: 0; bottom: 0; left: 0; padding-top: 60px;
+    }
+    .sidebar a { display: block; color: white; padding: 12px; text-decoration: none; }
+    .sidebar a:hover { background: #1abc9c; }
+    .main { margin-left: 240px; padding: 20px; }
+    .report-link { background: #ecf0f1; margin: 8px 0; padding: 10px; border-radius: 6px; }
+    footer { margin-top: 30px; text-align: center; font-size: 12px; color: gray; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; }
+    img { max-width: 100%; margin: 10px 0; border-radius: 8px; }
+    .instructions { background: #fff3cd; padding: 15px; margin: 15px 0; border-radius: 8px; border: 1px solid #ffeeba; }
+    #motivasi { background:#1abc9c;color:white;padding:8px;text-align:center; }
+    .chat-box { border:1px solid #ccc; border-radius:8px; padding:10px; height:300px; overflow-y:auto; background:white; margin-bottom:10px; }
+    .chat-message { margin:5px 0; padding:8px; border-radius:6px; max-width:70%; }
+    .chat-user { background:#d1f7c4; align-self:flex-start; }
+    .chat-other { background:#cce5ff; align-self:flex-end; margin-left:auto; }
+    .chat-input { display:flex; gap:5px; }
+    .chat-input input { flex:1; }
+  </style>
+</head>
+<body>
+  <header>📊 Task Management Tracker Operasional Surprice</header>  <!-- REGISTER -->  <div id="register" class="register-box">
+    <h2>Register</h2>
+    <p>Buat akun baru</p>
+    <input type="text" id="regName" placeholder="Nama Lengkap">
+    <input type="email" id="regEmail" placeholder="Email">
+    <input type="password" id="regPassword" placeholder="Password (min 8 huruf & angka)">
+    <button onclick="register()">Daftar</button>
+    <p id="regError" style="color:red;"></p>
+    <p>Sudah punya akun? <a href="#" onclick="showLogin()">Login disini</a></p>
+  </div>  <!-- LOGIN -->  <div id="login" class="login-box hidden">
+    <h2>Welcome</h2>
+    <p>Silakan login</p>
+    <input type="text" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p id="loginError" style="color:red;"></p>
+    <p>Belum punya akun? <a href="#" onclick="showRegister()">Daftar disini</a></p>
+  </div>  <!-- DASHBOARD -->  <div id="dashboard" class="hidden">
+    <div class="sidebar">
+      <a href="#" onclick="showReports('Gudang')">Gudang</a>
+      <a href="#" onclick="showReports('cs')">Customer Service</a>
+      <a href="#" onclick="showReports('marketing')">Marketing</a>
+      <a href="#" onclick="showReports('driver')">Driver</a>
+      <a href="#" onclick="showReports('finance')">Finance</a>
+      <a href="#" onclick="secureOperasional()">Kepala Operasional</a>
+      <a href="#" onclick="showReports('admin')">Admin</a>
+      <a href="#" onclick="openChat()">💬 Chat</a>
+      <a href="#" onclick="logout()">🚪 Logout</a>
+    </div><div class="main">
+  <div id="motivasi"></div>
+  <div class="topbar">
+    <h2 id="welcome"></h2>
+  </div>
+  <h3 id="menu-title">Pilih Menu</h3>
+  <div id="report-list"></div>
+
+  <!-- Instruksi penggunaan -->
+  <div id="instructions" class="instructions hidden"></div>
+
+  <!-- Upload Gambar Gudang -->
+  <div id="upload-gudang" class="hidden">
+    <h3>Upload Peta/Gambar Gudang</h3>
+    <input type="file" id="gudangImageInput" accept="image/*">
+    <button onclick="uploadGudangImage()">Upload</button>
+    <div id="gudangImageContainer"></div>
+  </div>
+
+  <!-- Form tambah laporan -->
+  <div id="add-report" class="hidden">
+    <h3>Tambah Link Laporan</h3>
+    <input type="text" id="report-name" placeholder="Nama Laporan (misal: Lap Operasional Oktober 2025)">
+    <input type="text" id="report-url" placeholder="Paste Link Google Spreadsheet">
+    <button onclick="saveReport()">Simpan</button>
+  </div>
+
+  <!-- Ganti Password Kepala Operasional -->
+  <div id="change-pass" class="hidden">
+    <h3>Ganti Password Kepala Operasional</h3>
+    <input type="password" id="newOperasionalPass" placeholder="Password Baru">
+    <button onclick="changeOperasionalPass()">Ganti Password</button>
+  </div>
+
+  <!-- Chat Section -->
+  <div id="chat-section" class="hidden">
+    <h3>💬 Chat Internal</h3>
+    <div id="chatBox" class="chat-box"></div>
+    <div class="chat-input">
+      <input type="text" id="chatMessage" placeholder="Tulis pesan...">
+      <button onclick="sendMessage()">Kirim</button>
+    </div>
+  </div>
+
+  <footer>© Sendi_Muchdianto</footer>
+</div>
+
+  </div>  <script>
+    // Data users dan reports
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+    let reports = JSON.parse(localStorage.getItem("reports")) || { cs: [], marketing: [], driver: [], finance: [], operasional: [], admin: [], Gudang: [] };
+    let chatMessages = JSON.parse(localStorage.getItem("chatMessages")) || [];
+
+    // Variabel global
+    let gudangImage = localStorage.getItem("gudangImage") || null;
+    let operasionalPass = localStorage.getItem("operasionalPass") || "admin123";
+    let currentUser = null;
+    let currentMenu = "";
+
+    const instructionsMap = {
+      "Gudang": "📦 Menu Gudang → Upload peta gudang A–J, tambah laporan stok, lokasi barang.",
+      "cs": "📞 Customer Service → Tambah link laporan interaksi customer, komplain, follow-up.",
+      "marketing": "📢 Marketing → Simpan laporan campaign, performa iklan, strategi penjualan.",
+      "driver": "🚚 Driver → Upload laporan perjalanan, penggunaan BBM, rute pengiriman.",
+      "finance": "💰 Finance → Simpan laporan keuangan, arus kas, biaya operasional.",
+      "operasional": "⚙️ Kepala Operasional → Akses semua laporan divisi, bisa ganti password khusus.",
+      "admin": "🛠️ Admin → Kontrol data sistem, maintenance, serta backup laporan."
+    };
+
+    const motivasiList = [
+      "💡 Tetap semangat tim! Fokus hari ini = hasil besar esok 🌟",
+      "🚀 Kerja keras mengalahkan bakat ketika bakat tidak bekerja keras!",
+      "🔥 Jangan menunda pekerjaan, sukses diraih bersama!",
+      "🌱 Konsistensi kecil setiap hari membuahkan hasil besar!"
+    ];
+
+    function tampilkanMotivasi(){
+      const rand = motivasiList[Math.floor(Math.random() * motivasiList.length)];
+      document.getElementById("motivasi").innerHTML = `<marquee>${rand}</marquee>`;
+    }
+
+    // Auth Functions
+    function showRegister(){
+      document.getElementById("register").classList.remove("hidden");
+      document.getElementById("login").classList.add("hidden");
+    }
+
+    function showLogin(){
+      document.getElementById("login").classList.remove("hidden");
+      document.getElementById("register").classList.add("hidden");
+    }
+
+    function register(){
+      const name = document.getElementById("regName").value;
+      const email = document.getElementById("regEmail").value;
+      const password = document.getElementById("regPassword").value;
+
+      if(!name || !email || !password){
+        document.getElementById("regError").innerText = "Semua field wajib diisi";
+        return;
+      }
+
+      const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+      if(!regex.test(password)){
+        document.getElementById("regError").innerText = "Password harus min 8 karakter kombinasi huruf & angka";
+        return;
+      }
+
+      if(users.find(u => u.email === email)){
+        document.getElementById("regError").innerText = "Email sudah terdaftar";
+        return;
+      }
+
+      users.push({name, email, password});
+      localStorage.setItem("users", JSON.stringify(users));
+      alert("Registrasi berhasil! Silakan login.");
+      showLogin();
+    }
+
+    function login(){
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      const user = users.find(u => u.email === email && u.password === password);
+
+      if(user){
+        currentUser = user;
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("dashboard").classList.remove("hidden");
+        document.getElementById("welcome").innerText = "Selamat datang, " + user.name;
+        tampilkanMotivasi();
+      } else {
+        document.getElementById("loginError").innerText = "Email atau password salah!";
+      }
+    }
+
+    function logout(){
+      currentUser = null;
+      document.getElementById("dashboard").classList.add("hidden");
+      document.getElementById("login").classList.remove("hidden");
+      document.getElementById("loginEmail").value = "";
+      document.getElementById("loginPassword").value = "";
+      document.getElementById("loginError").innerText = "";
+    }
+
+    // Operasional Functions
+    function secureOperasional(){
+      const pass = prompt("Masukkan password khusus Kepala Operasional:");
+      if(pass === operasionalPass){
+        showReports("operasional");
+        document.getElementById("change-pass").classList.remove("hidden");
+      } else {
+        alert("Password salah!");
+      }
+    }
+
+    function changeOperasionalPass(){
+      const newPass = document.getElementById("newOperasionalPass").value;
+      if(newPass.length >= 6){
+        operasionalPass = newPass;
+        localStorage.setItem("operasionalPass", newPass);
+        alert("Password Kepala Operasional berhasil diganti!");
+        document.getElementById("newOperasionalPass").value = "";
+      } else {
+        alert("Password minimal 6 karakter!");
+      }
+    }
+
+    // Report Functions
+    function showReports(menu){
+      currentMenu = menu;
+      const list = document.getElementById("report-list");
+      const title = document.getElementById("menu-title");
+      const addForm = document.getElementById("add-report");
+      const uploadGudang = document.getElementById("upload-gudang");
+      const instruksi = document.getElementById("instructions");
+      const chat = document.getElementById("chat-section");
+
+      title.innerText = "Daftar Laporan " + menu.toUpperCase();
+      list.innerHTML = "";
+      reports[menu].forEach((r) => {
+        const div = document.createElement("div");
+        div.className = "report-link";
+        div.innerHTML = `<a href="${r.url}" target="_blank">${r.name}</a>`;
+        list.appendChild(div);
+      });
+
+      instruksi.innerText = instructionsMap[menu] || "";
+      instruksi.classList.remove("hidden");
+
+      addForm.classList.remove("hidden");
+      chat.classList.add("hidden");
+
+      if(menu === "Gudang"){
+        uploadGudang.classList.remove("hidden");
+        if(gudangImage){
+          document.getElementById("gudangImageContainer").innerHTML = `<img src="${gudangImage}" alt="Peta Gudang">`;
+        }
+      } else {
+        uploadGudang.classList.add("hidden");
+      }
+    }
+
+    function saveReport(){
+      const name = document.getElementById("report-name").value;
+      const url = document.getElementById("report-url").value;
+
+      if (name && url) {
+        reports[currentMenu].push({ name, url });
+        localStorage.setItem("reports", JSON.stringify(reports));
+        showReports(currentMenu);
+        document.getElementById("report-name").value = "";
+        document.getElementById("report-url").value = "";
+      }
+    }
+
+    // Gudang Functions
+    function uploadGudangImage(){
+      const input = document.getElementById("gudangImageInput");
+      const file = input.files[0];
+      if(file){
+        const reader = new FileReader();
+        reader.onload = function(e){
+          gudangImage = e.target.result;
+          localStorage.setItem("gudangImage", gudangImage);
+          document.getElementById("gudangImageContainer").innerHTML = `<img src="${gudangImage}" alt="Peta Gudang">`;
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Chat Functions
+    function openChat(){
+      document.getElementById("menu-title").innerText = "💬 Chat Internal";
+      document.getElementById("report-list").innerHTML = "";
+      document.getElementById("instructions").classList.add("hidden");
+      document.getElementById("add-report").classList.add("hidden");
+      document.getElementById("upload-gudang").classList.add("hidden");
+      document.getElementById("change-pass").classList.add("hidden");
+      document.getElementById("chat-section").classList.remove("hidden");
+      renderChat();
+    }
+
+    function sendMessage(){
+      const msg = document.getElementById("chatMessage").value;
+      if(msg && currentUser){
+        chatMessages.push({user: currentUser.name, text: msg});
+        localStorage.setItem("chatMessages", JSON.stringify(chatMessages));
+        document
